@@ -14,7 +14,7 @@
   --o2:#41D2DE; --o2-soft:rgba(65,210,222,.12);
   --gold:#E2A83E; --hazard:#E37359; --fuel:#C98BE0; --hp:#8FCB6B;
   --band-loam:#BB9E64; --band-rock:#7F949B; --band-crystal:#9E8BDA;
-  --band-lava:#E37359; --band-abyss:#4F90AC; --band-core:#E2A83E;
+  --band-lava:#E37359; --band-abyss:#4F90AC; --band-core:#E2A83E; --band-scan:#86C98F;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -94,7 +94,7 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
   overflow:auto; pointer-events:auto;
 }
 .veil[hidden]{display:none}
-.panel{width:100%; max-width:900px}
+.panel{width:100%; max-width:1000px}
 .eyebrow{
   font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.2em;
   text-transform:uppercase; color:var(--o2); margin-bottom:10px;
@@ -124,25 +124,28 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
 .btnrow .hint{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-2); letter-spacing:.04em}
 
 /* ---------- skill tree ---------- */
-.branches{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:6px}
+.branches{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:6px}
 .branch{display:flex; flex-direction:column}
 .branch h4{
   text-align:center; padding:7px 6px; color:#0B0E10; background:var(--b);
   font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase;
 }
-.branch h4 em{display:block; font-style:normal; font-family:"IBM Plex Sans KR",sans-serif; font-size:12px; letter-spacing:0; text-transform:none}
+.branch h4{padding:6px 4px; font-size:9.5px}
+.branch h4 em{display:block; font-style:normal; font-family:"IBM Plex Sans KR",sans-serif; font-size:11.5px; letter-spacing:0; text-transform:none}
 .branch h4 u{display:block; text-decoration:none; font-size:9px; opacity:.7; letter-spacing:.1em}
-.tier{position:relative; padding-top:18px; display:grid; gap:6px}
+.tier{position:relative; padding-top:18px; display:grid; gap:5px; grid-template-columns:repeat(var(--n,1),1fr)}
 .tier::before{content:""; position:absolute; top:0; left:50%; width:2px; height:18px; background:var(--stone-3)}
-.tier.split{grid-template-columns:1fr 1fr}
-.tier.split::after{content:""; position:absolute; top:9px; left:25%; right:25%; height:2px; background:var(--stone-3)}
-.tier.split .node::before{content:""; position:absolute; top:-9px; left:50%; width:2px; height:9px; background:var(--stone-3)}
+.tier.multi::after{
+  content:""; position:absolute; top:9px; height:2px; background:var(--stone-3);
+  left:calc(50% / var(--n)); right:calc(50% / var(--n));
+}
+.tier.multi .node::before{content:""; position:absolute; top:-9px; left:50%; width:2px; height:9px; background:var(--stone-3)}
 .node{
   position:relative; background:var(--stone-1); border:1px solid var(--stone-2);
-  padding:7px 8px 6px; font-size:11px; line-height:1.35; color:var(--ink-2);
+  padding:6px 7px 5px; font-size:10.5px; line-height:1.32; color:var(--ink-2);
   text-align:left; cursor:pointer; font-family:inherit; min-height:100%;
 }
-.node b{display:block; color:var(--ink-1); font-weight:600; font-size:12px; margin-bottom:1px}
+.node b{display:block; color:var(--ink-1); font-weight:600; font-size:11.5px; margin-bottom:1px}
 .node .cost{
   display:block; font-family:"IBM Plex Mono",monospace; font-size:9.5px;
   letter-spacing:.06em; margin-top:4px; color:var(--gold);
@@ -158,7 +161,7 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
 .node.locked{opacity:.42; cursor:not-allowed}
 .node.apex b{color:var(--b)}
 
-.cross{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:14px}
+.cross{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-top:16px}
 .crossnode{
   background:var(--stone-1); border:1px dashed var(--stone-3); padding:8px 10px;
   font-size:11px; color:var(--ink-2); cursor:pointer; text-align:left; font-family:inherit; line-height:1.35;
@@ -191,9 +194,13 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
 .footnote{margin-top:14px; font-size:12.5px; color:var(--ink-2)}
 .footnote b{color:var(--o2)}
 :focus-visible{outline:2px solid var(--o2); outline-offset:2px}
+@media (max-width:1080px){
+  .branches{grid-template-columns:repeat(3,1fr); gap:18px 10px}
+  .cross{grid-template-columns:repeat(3,1fr)}
+}
 @media (max-width:820px){
   .stats{grid-template-columns:repeat(2,1fr)}
-  .branches{grid-template-columns:repeat(2,1fr); gap:16px 12px}
+  .branches{grid-template-columns:repeat(2,1fr); gap:18px 10px}
   .cross{grid-template-columns:repeat(2,1fr)}
   .gauge{width:140px}
 }
@@ -208,7 +215,7 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
   </div>
 
   <div class="stage" id="stage">
-    <canvas id="cv" width="960" height="560"></canvas>
+    <canvas id="cv" width="1024" height="608"></canvas>
 
     <div class="hud" id="hud">
       <div class="hud-tl">
@@ -219,7 +226,8 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
       <div class="hud-tr">
         <div class="depth" id="hud-depth">0<em>m</em></div>
         <div class="bandtag" id="hud-band" style="--c:var(--band-loam)">표토층</div>
-        <div class="press" id="hud-press">PRESSURE 1.00× · 1.0 O₂/s</div>
+        <div class="press" id="hud-press">0.60 O₂/s · 깊이 기반</div>
+        <div class="press" id="hud-return">귀환 필요 ≈ 0</div>
       </div>
       <div class="hud-bl">
         <div class="cargo" id="hud-cargo"></div>
@@ -237,15 +245,17 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
     <div><kbd>A / D</kbd>이동 · 벽 굴착</div>
     <div><kbd>S</kbd>아래 굴착</div>
     <div><kbd>W / Space</kbd>부스터 상승</div>
-    <div><kbd>R</kbd>길게 — 긴급 귀환</div>
+    <div><kbd>Esc</kbd>일시 정지</div>
     <div><kbd>F</kbd>코어 드릴 <span id="lg-f" style="opacity:.5">(미해금)</span></div>
     <div><kbd>Q</kbd>귀환 앵커 <span id="lg-q" style="opacity:.5">(미해금)</span></div>
   </div>
 
-  <p class="footnote"><b>연료는 접지 시 100%, 좌우 벽에 닿아 버티는 동안 80% 속도로 충전된다.</b>
-    1타일 샤프트는 굴뚝이 된다 — 상승과 버티기를 번갈아 오른다. 그래서 귀환은
-    “올라갈 수 있는가”가 아니라 <b>“올라가는 데 산소를 얼마나 태울 것인가”</b>의 문제다.
-    A/D로 벽을 파 발판을 만들면 100% 속도로 충전되지만, 그 굴착에도 산소가 든다.</p>
+  <p class="footnote"><b>산소는 오직 현재 깊이로만 줄어든다</b> — <code>소모율 = 0.60 + 깊이 × 0.0100</code>.
+    굴착·부스터·적재 무게는 산소를 건드리지 않는다. 그래서 HUD의 <b>O₂/s</b>와
+    <b>귀환 필요 산소</b> 두 숫자만 보면 지금 더 내려가도 되는지 정확히 판단할 수 있다.<br>
+    연료는 접지 시 100%, 좌우 벽에 닿아 버티는 동안 80% 속도로 충전된다 — 1타일 샤프트는 굴뚝이 된다.
+    연료가 마르면 <b>35%까지 채워야 재점화</b>되므로, 귀환은 “태우고 → 버티며 채우고 → 다시 태운다”의 반복이 된다.
+    연료가 없어도 <b>W를 누르고 있으면 활공</b>해 천천히 내려오므로, W는 언제나 눌러도 되는 키다.</p>
 
 </div>
 
@@ -258,13 +268,26 @@ canvas{display:block; width:100%; height:auto; image-rendering:pixelated}
    ============================================================ */
 
 /* ---------- 1. 상수 ---------- */
-const TILE = 20, CHUNK = 16, WORLD_W = 48;        // 월드 폭 3청크 = 48타일
-const VW = WORLD_W * TILE, VH = 560;               // 캔버스 960 x 560
-const GRAV = 900, MAX_FALL = 520, RISE = 200, RISE_ACC = 2600, MOVE = 132;
-const FUEL_DRAIN = 36, FUEL_REFILL = 34, WALL_REFILL = 0.8, WALL_SLIDE = 70;
-const BOOST_O2_MUL = 1.8, DIG_SEC = 0.5;
-const PW = 15, PH = 18;                            // 플레이어 히트박스
-const FALL_SAFE = 470;
+const TILE = 32, CHUNK = 16, WORLD_W = 32;         // 블록 32px · 월드 폭 2청크 = 32타일
+const VW = WORLD_W * TILE, VH = 608;               // 캔버스 1024 x 608 (19타일 높이)
+const GRAV = 1440, MAX_FALL = 700, RISE = 320, RISE_ACC = 4160, MOVE = 211;
+const FUEL_DRAIN = 36, FUEL_REFILL = 34, WALL_REFILL = 0.8, WALL_SLIDE = 55;
+const RELIGHT = 0.35;   // 연료가 마르면 최대치의 이 비율까지 채워야 재점화된다
+const GLIDE = 100;      // 연료 없이 W를 누르고 있을 때의 활공 낙하 속도
+const AIR_REFILL = 0.45;// 공중 충전 비율 (접지 1.0 · 굴뚝 0.8)
+/* 결과 — 사이클당 순 상승: 굴뚝 +7.5타일/2.3초(3.3타일/s), 활공 +2.5타일/3.3초(0.8타일/s) */
+const DIG_SEC = 0.5;
+const PW = 24, PH = 29;                            // 플레이어 히트박스
+const FALL_SAFE = 620;
+const SPAWN_TX = WORLD_W >> 1;
+
+/* ── 산소 모델 ──────────────────────────────────────────────
+   산소는 오직 "현재 깊이"로만 소모된다. 굴착·부스터·적재 무게·
+   환경은 산소를 건드리지 않는다 — 그래서 HUD의 O₂/s 하나만 보면
+   지금 자신이 얼마나 빠르게 타고 있는지 정확히 알 수 있다.
+       drain(d) = O2_IDLE + d × O2_PER_M
+   ──────────────────────────────────────────────────────── */
+const O2_IDLE = 0.6, O2_PER_M = 0.010;
 
 const T = { EMPTY:0, ROCK:1, ORE:2, LAVA:3, GAS:4, AIR:5, WALL:6 };
 
@@ -305,6 +328,7 @@ const BANDS = [
 ];
 const BAND_VAR = { loam:'--band-loam', rock:'--band-rock', crystal:'--band-crystal',
                    lava:'--band-lava', abyss:'--band-abyss', core:'--band-core' };
+const RICH = 160;   // 이 판매가 이상을 '고가치'로 본다
 function bandAt(depth){
   for (let i = BANDS.length - 1; i >= 0; i--) if (depth >= BANDS[i].top) return BANDS[i];
   return BANDS[0];
@@ -312,48 +336,64 @@ function bandAt(depth){
 
 /* ---------- 2. 스킬 트리 데이터 ---------- */
 const TIER_COST = { 1:80, 2:220, 3:600, 4:1600 };
-const TIER_GATE = { 1:0, 2:1, 3:5, 4:9 };   // 해당 갈래 누적 포인트 (갈래 최대 12PT)
+const TIER_GATE = { 1:0, 2:1, 3:5, 4:7 };   // 해당 갈래 누적 포인트
 const APEX_SHARDS = 3;
 
 const TREE = [
   { id:'lung', n:'폐', en:'LUNG', v:'--band-abyss', tiers:[
-      [{ id:'lung1', n:'호흡 훈련', t:1, max:1, d:'최대 산소 +10' }],
-      [{ id:'lungA', n:'큰 폐', t:2, max:3, d:'최대 산소 +22 / 랭크' },
-       { id:'lungB', n:'느린 호흡', t:2, max:3, d:'기본 소모 −10% / 랭크' }],
-      [{ id:'lungC', n:'가압복', t:3, max:2, d:'압력 계수 −25% / 랭크' },
-       { id:'lungD', n:'회수 호흡', t:3, max:2, d:'광석 채굴 시 산소 +1 / 랭크' }],
-      [{ id:'lungX', n:'★ 심해폐', t:4, max:1, apex:1, d:'250m 이하 압력 증가 정지' }]
+      [{ id:'lung1', n:'호흡 훈련', t:1, max:1, d:'최대 산소 +20' }],
+      [{ id:'lungA', n:'큰 폐', t:2, max:3, d:'최대 산소 +45 / 랭크' },
+       { id:'lungB', n:'느린 호흡', t:2, max:3, d:'기본 소모 −12% / 랭크' }],
+      [{ id:'lungC', n:'가압복', t:3, max:2, d:'깊이 계수 −28% / 랭크' },
+       { id:'lungD', n:'회수 호흡', t:3, max:2, d:'직접 채굴한 광석당 산소 +1 / 랭크' },
+       { id:'lungE', n:'폐 정화', t:3, max:1, d:'유독가스 피해 −70%' }],
+      [{ id:'lungX', n:'★ 심해폐', t:4, max:1, apex:1, d:'깊이 계수 −35% (심층에서 압도적)' }]
     ]},
   { id:'drill', n:'드릴', en:'DRILL', v:'--band-lava', tiers:[
-      [{ id:'dril1', n:'드릴 정비', t:1, max:1, d:'굴착 속도 +10%' }],
+      [{ id:'dril1', n:'드릴 정비', t:1, max:1, d:'굴착 속도 +12%' }],
       [{ id:'drilA', n:'강화 드릴날', t:2, max:3, d:'굴착 속도 +12% / 랭크' },
-       { id:'drilB', n:'관통', t:2, max:2, d:'경도 −1 취급 / 랭크' }],
-      [{ id:'drilC', n:'광역 굴착', t:3, max:1, d:'아래를 팔 때 좌우도 함께 파괴' },
-       { id:'drilD', n:'효율 굴착', t:3, max:2, d:'굴착 산소 −30% / 랭크' }],
+       { id:'drilB', n:'관통', t:2, max:2, d:'경도 −1 취급 / 랭크' },
+       { id:'drilC', n:'정밀 굴착', t:2, max:2, d:'광석 타일 굴착 +35% / 랭크' }],
+      [{ id:'drilD', n:'광역 굴착', t:3, max:1, d:'아래를 팔 때 좌우도 함께 파괴' },
+       { id:'drilE', n:'암반 분쇄', t:3, max:2, d:'경도 5 이상 굴착 +40% / 랭크' }],
       [{ id:'drilX', n:'★ 코어 드릴', t:4, max:1, apex:1, d:'F — 아래 5칸 즉시 관통 (쿨 8초)' }]
     ]},
   { id:'pack', n:'등짐', en:'PACK', v:'--band-core', tiers:[
-      [{ id:'pack1', n:'짐 꾸리기', t:1, max:1, d:'적재 한계 +5' }],
-      [{ id:'packA', n:'넓은 등짐', t:2, max:3, d:'적재 한계 +8 / 랭크' },
-       { id:'packB', n:'감정가', t:2, max:3, d:'판매가 +10% / 랭크' }],
+      [{ id:'pack1', n:'짐 꾸리기', t:1, max:1, d:'적재 한계 +8' }],
+      [{ id:'packA', n:'넓은 등짐', t:2, max:3, d:'적재 한계 +10 / 랭크' },
+       { id:'packB', n:'감정가', t:2, max:3, d:'판매가 +10% / 랭크' },
+       { id:'packF', n:'경량 포장', t:2, max:2, d:'광석 무게 −1 / 랭크 (최소 1)' }],
       [{ id:'packC', n:'자석', t:3, max:1, d:'같은 광석 인접 타일 자동 수집' },
-       { id:'packD', n:'보험', t:3, max:2, d:'쿵 손실 50% → 25% → 10%' }],
+       { id:'packD', n:'보험', t:3, max:2, d:'쿵 손실 50% → 25% → 10%' },
+       { id:'packG', n:'선별', t:3, max:1, d:'적재 초과 시 최저가 광석 자동 폐기' }],
       [{ id:'packX', n:'★ 차원 주머니', t:4, max:1, apex:1, d:'무게 초과 페널티 삭제' }]
     ]},
   { id:'boost', n:'부스터', en:'BOOST', v:'--band-crystal', tiers:[
-      [{ id:'bost1', n:'예열', t:1, max:1, d:'연료 +15' }],
-      [{ id:'bostA', n:'연료통', t:2, max:3, d:'최대 연료 +25 / 랭크' },
-       { id:'bostB', n:'추진 노즐', t:2, max:3, d:'추력 +12% / 랭크' }],
-      [{ id:'bostC', n:'냉각 코일', t:3, max:2, d:'접지 충전 +70%, 공중 미세 충전' },
-       { id:'bostD', n:'효율 분사', t:3, max:2, d:'부스터 산소 소모 −40% / 랭크' }],
+      [{ id:'bost1', n:'예열', t:1, max:1, d:'최대 연료 +20' }],
+      [{ id:'bostA', n:'연료통', t:2, max:3, d:'최대 연료 +30 / 랭크' },
+       { id:'bostB', n:'추진 노즐', t:2, max:3, d:'상승 속도 +12% / 랭크' },
+       { id:'bostF', n:'연료 정제', t:2, max:2, d:'연료 소모 −22% / 랭크' }],
+      [{ id:'bostC', n:'냉각 코일', t:3, max:2, d:'충전 속도 +70%, 공중 충전 +25%p / 랭크' },
+       { id:'bostD', n:'역추진', t:3, max:1, d:'낙하 피해 무효' }],
       [{ id:'bostX', n:'★ 귀환 앵커', t:4, max:1, apex:1, d:'Q — 즉시 지상 귀환, 판당 1회' }]
+    ]},
+  { id:'scan', n:'탐사', en:'SCAN', v:'--band-scan', tiers:[
+      [{ id:'scan1', n:'지질 감각', t:1, max:1, d:'화면 내 광석 윤곽 표시' }],
+      [{ id:'scanA', n:'랜턴', t:2, max:3, d:'암흑 시야 +2.5타일 / 랭크' },
+       { id:'scanB', n:'감정 스캔', t:2, max:2, d:'금 이상 고가치 광석 강조' }],
+      [{ id:'scanC', n:'위험 감지', t:3, max:1, d:'암반 속 가스·용암 경고 표시' },
+       { id:'scanD', n:'산소 탐지', t:3, max:1, d:'에어포켓 표시 + 최근접 깊이 안내' }],
+      [{ id:'scanX', n:'★ 심층 스캔', t:4, max:1, apex:1, d:'암흑 무시 · 화면 전체 투시' }]
     ]}
 ];
 const CROSS = [
-  { id:'xRecycle', n:'산소 재활용 드릴', req:['lung','drill'], need:6, cost:900, d:'굴착에 쓴 산소의 30% 환급' },
-  { id:'xSense',   n:'광부의 직감',     req:['pack','boost'], need:6, cost:900, d:'암흑 속 광맥·에어포켓 실루엣 표시' },
-  { id:'xCompact', n:'압축 채굴',       req:['lung','pack'],  need:6, cost:900, d:'광석 무게 −1 (최소 1)' },
-  { id:'xLift',    n:'비상 부양',       req:['boost','lung'], need:6, cost:900, d:'산소 15% 이하 시 추력 ×2, 연료 소모 절반' }
+  { id:'xVein',    n:'지질 공명',      req:['scan','drill'], need:6, cost:900,  d:'광석 타일 굴착 속도 +30%' },
+  { id:'xPurify',  n:'산소 정제기',    req:['scan','lung'],  need:6, cost:900,  d:'에어포켓 회복량 ×2' },
+  { id:'xAppraise',n:'화물 스캐너',    req:['scan','pack'],  need:6, cost:1000, d:'금 이상 광석 판매가 +30%' },
+  { id:'xCompact', n:'압축 채굴',      req:['lung','pack'],  need:6, cost:900,  d:'광석 무게 −1 (최소 1)' },
+  { id:'xLift',    n:'비상 부양',      req:['boost','lung'], need:6, cost:900,  d:'산소 15% 이하 시 상승 ×2, 연료 소모 절반' },
+  { id:'xHeat',    n:'열 회수 드릴',   req:['drill','boost'],need:6, cost:900,  d:'광석 채굴 시 연료 +10' },
+  { id:'xBalance', n:'하중 분산',      req:['pack','boost'], need:6, cost:900,  d:'무게 초과 시 상승 속도 페널티 삭제' }
 ];
 const NODE_BY_ID = {};
 TREE.forEach(b => b.tiers.forEach(tr => tr.forEach(nd => { nd.branch = b.id; NODE_BY_ID[nd.id] = nd; })));
@@ -370,42 +410,68 @@ function branchPoints(ranks, bid){
 function computeStats(ranks){
   const r = id => ranks[id] || 0;
   const s = {
-    o2Max: 120, drainBase: 1.0, pressCoef: 0.12, pressCap: Infinity,
-    digSpeed: 1.0, penetrate: 0, digO2: 1.0, wideDig: false, coreDrill: false,
-    cap: 40, sellMul: 1.0, magnet: false, loss: 0.5, noOver: false,
+    // 산소 — 오직 깊이의 함수
+    o2Max: 120, o2Idle: O2_IDLE, o2PerM: O2_PER_M,
+    o2PerOre: 0, gasResist: 0, airMul: 1,
+    // 드릴
+    digSpeed: 1.0, penetrate: 0, oreDig: 1, hardDig: 1, veinDig: 1,
+    wideDig: false, coreDrill: false,
+    // 등짐
+    cap: 40, sellMul: 1.0, richBonus: 1, magnet: false, sort: false,
+    loss: 0.5, noOver: false, weightCut: 0,
+    // 부스터
     fuelMax: 100, thrust: 1.0, refill: FUEL_REFILL, airRefill: 0,
-    boostO2: 1.0, anchor: false,
-    o2PerOre: 0, refund: 0, weightCut: 0, senses: false, lift: false
+    fuelEff: 1, fuelPerOre: 0, anchor: false, lift: false,
+    noFallDmg: false, noRisePenalty: false,
+    // 탐사
+    showOre: false, showRich: false, showHazard: false, showAir: false,
+    fogBonus: 0, xray: false
   };
-  s.o2Max      += 10 * r('lung1') + 22 * r('lungA');
-  s.drainBase  *= Math.pow(0.90, r('lungB'));
-  s.pressCoef  *= Math.pow(0.75, r('lungC'));
-  s.o2PerOre    = r('lungD');
-  if (r('lungX')) s.pressCap = 250;
-
-  s.digSpeed   *= (1 + 0.10 * r('dril1')) * (1 + 0.12 * r('drilA'));
-  s.penetrate   = r('drilB');
-  s.wideDig     = !!r('drilC');
-  s.digO2      *= Math.pow(0.70, r('drilD'));
-  s.coreDrill   = !!r('drilX');
-
-  s.cap        += 5 * r('pack1') + 8 * r('packA');
-  s.sellMul    += 0.10 * r('packB');
-  s.magnet      = !!r('packC');
-  s.loss        = [0.5, 0.25, 0.10][r('packD')];
-  s.noOver      = !!r('packX');
-
-  s.fuelMax    += 15 * r('bost1') + 25 * r('bostA');
-  s.thrust     *= (1 + 0.12 * r('bostB'));
-  s.refill     *= (1 + 0.70 * r('bostC'));
-  s.airRefill   = r('bostC') ? 6 : 0;
-  s.boostO2    *= Math.pow(0.60, r('bostD'));
-  s.anchor      = !!r('bostX');
-
-  s.refund    = r('xRecycle') ? 0.30 : 0;
-  s.senses    = !!r('xSense');
-  s.weightCut = r('xCompact') ? 1 : 0;
-  s.lift      = !!r('xLift');
+  // 폐
+  s.o2Max    += 20 * r('lung1') + 45 * r('lungA');
+  s.o2Idle   *= Math.pow(0.88, r('lungB'));
+  s.o2PerM   *= Math.pow(0.72, r('lungC'));
+  s.o2PerOre  = r('lungD');
+  s.gasResist = r('lungE') ? 0.7 : 0;
+  if (r('lungX')) s.o2PerM *= 0.65;
+  // 드릴
+  s.digSpeed *= (1 + 0.12 * r('dril1')) * (1 + 0.12 * r('drilA'));
+  s.penetrate = r('drilB');
+  s.oreDig   *= (1 + 0.35 * r('drilC'));
+  s.wideDig   = !!r('drilD');
+  s.hardDig  *= (1 + 0.40 * r('drilE'));
+  s.coreDrill = !!r('drilX');
+  // 등짐
+  s.cap      += 8 * r('pack1') + 10 * r('packA');
+  s.sellMul  += 0.10 * r('packB');
+  s.weightCut = r('packF');
+  s.magnet    = !!r('packC');
+  s.loss      = [0.5, 0.25, 0.10][r('packD')];
+  s.sort      = !!r('packG');
+  s.noOver    = !!r('packX');
+  // 부스터
+  s.fuelMax  += 20 * r('bost1') + 30 * r('bostA');
+  s.thrust   *= (1 + 0.12 * r('bostB'));
+  s.fuelEff  *= Math.pow(0.78, r('bostF'));
+  s.refill   *= (1 + 0.70 * r('bostC'));
+  s.airRefill = 0.25 * r('bostC');   // 공중 충전 비율에 가산
+  s.noFallDmg = !!r('bostD');
+  s.anchor    = !!r('bostX');
+  // 탐사
+  s.showOre    = !!r('scan1');
+  s.fogBonus   = 2.5 * r('scanA');
+  s.showRich   = !!r('scanB');
+  s.showHazard = !!r('scanC');
+  s.showAir    = !!r('scanD');
+  if (r('scanX')){ s.xray = true; s.showOre = s.showRich = s.showHazard = s.showAir = true; }
+  // 교차
+  if (r('xVein'))     s.veinDig *= 1.30;
+  if (r('xPurify'))   s.airMul  *= 2;
+  if (r('xAppraise')) s.richBonus = 1.30;
+  if (r('xCompact'))  s.weightCut += 1;
+  s.lift = !!r('xLift');
+  if (r('xHeat'))     s.fuelPerOre = 10;
+  s.noRisePenalty = !!r('xBalance');
   return s;
 }
 
@@ -594,12 +660,12 @@ const pending = Object.create(null);   // 단발 액션 래치
 function newRun(){
   stats = computeStats(save.ranks);
   run = {
-    x: 24 * TILE + (TILE - PW) / 2, y: -PH, vx: 0, vy: 0,
+    x: SPAWN_TX * TILE + (TILE - PW) / 2, y: -PH, vx: 0, vy: 0,
     o2: stats.o2Max, fuel: stats.fuelMax, hp: 100,
     cargo: {}, shards: 0, weight: 0,
     depth: 0, maxDepth: 0, grounded: true, descended: false,
-    dig: null, boosting: false, cling: false, anchorUsed: false, coreCD: 0,
-    rHold: 0, gasHit: 0, hint: 0, blocked: 0, hintCeil: -1, t: 0
+    dig: null, boosting: false, cling: false, gliding: false, relight: false, anchorUsed: false, coreCD: 0,
+    gasHit: 0, hint: 0, blocked: 0, escape: 0, hintCeil: -1, t: 0
   };
   chunks.clear();
   save.seed = (Math.random() * 1e9) | 0;
@@ -620,10 +686,16 @@ function overlapsSolid(px, py){
       if (solid(tileAt(tx, ty).t)) return true;
   return false;
 }
+/* 점유 칸의 바로 왼쪽/오른쪽 칸 (타일 크기·히트박스와 무관하게 항상 옳다) */
+const colL = px => Math.floor(px / TILE) - 1;
+const colR = px => Math.floor((px + PW - 1) / TILE) + 1;
+
 function touchingWall(px, py){
-  const ty = Math.floor((py + PH / 2) / TILE);
-  return solid(tileAt(Math.floor((px - 3) / TILE), ty).t) ||
-         solid(tileAt(Math.floor((px + PW + 3) / TILE), ty).t);
+  const ty0 = Math.floor((py + 4) / TILE), ty1 = Math.floor((py + PH - 5) / TILE);
+  const l = colL(px), r = colR(px);
+  for (let ty = ty0; ty <= ty1; ty++)
+    if (solid(tileAt(l, ty).t) || solid(tileAt(r, ty).t)) return true;
+  return false;
 }
 function touchesLava(px, py){
   const x0 = Math.floor(px / TILE), x1 = Math.floor((px + PW - 1) / TILE);
@@ -638,41 +710,61 @@ function touchesLava(px, py){
 function mineTile(tx, ty, free){
   const tl = tileAt(tx, ty);
   if (!solid(tl.t) || tl.t === T.WALL) return;
-  const hardEff = Math.max(1, tl.hard - stats.penetrate);
-  if (!free){
-    const cost = hardEff * 0.6 * pressure() * stats.digO2 * (1 - stats.refund);
-    run.o2 -= cost;
-  }
-  clearTile(tx, ty);
+  clearTile(tx, ty);   // 굴착은 산소를 소모하지 않는다 — 시간만 쓴다
 
   if (tl.t === T.ORE){
     const key = ORE_KEYS[tl.ore];
-    collect(key);
+    collect(key, free);
     if (stats.magnet){
       const nb = [[tx - 1, ty], [tx + 1, ty], [tx, ty - 1], [tx, ty + 1]];
       for (const [nx, ny] of nb){
         const n = tileAt(nx, ny);
-        if (n.t === T.ORE && ORE_KEYS[n.ore] === key){ clearTile(nx, ny); collect(key); }
+        if (n.t === T.ORE && ORE_KEYS[n.ore] === key){ clearTile(nx, ny); collect(key, true); }
       }
     }
   } else if (tl.t === T.AIR){
-    run.o2 = Math.min(stats.o2Max, run.o2 + 25);
-    toast('에어 포켓 · 산소 +25');
+    const gain = Math.round(28 * stats.airMul);
+    run.o2 = Math.min(stats.o2Max, run.o2 + gain);
+    toast('에어 포켓 · 산소 +' + gain);
   } else if (tl.t === T.GAS){
-    run.o2 -= 15; run.gasHit = 3;
-    toast('유독가스 · 산소 −15, 3초간 소모 2배');
+    const dmg = Math.round(18 * (1 - stats.gasResist));
+    run.o2 -= dmg;
+    toast('유독가스 · 산소 −' + dmg);
   }
 }
-function collect(key){
+function collect(key, free){
   const o = ORES[key];
   if (o.shard){ run.shards++; toast('코어 조각 획득'); return; }
   run.cargo[key] = (run.cargo[key] || 0) + 1;
   run.weight += Math.max(1, o.w - stats.weightCut);
-  run.o2 = Math.min(stats.o2Max, run.o2 + stats.o2PerOre);
+  if (!free) run.o2 = Math.min(stats.o2Max, run.o2 + stats.o2PerOre);
+  if (stats.fuelPerOre) run.fuel = Math.min(stats.fuelMax, run.fuel + stats.fuelPerOre);
+  if (stats.sort) while (overweight()){                 // 선별 — 가장 싼 광석을 버린다
+    let worst = null;
+    for (const k in run.cargo) if (run.cargo[k] > 0 && (!worst || ORES[k].v < ORES[worst].v)) worst = k;
+    if (!worst) break;
+    run.cargo[worst]--; run.weight -= Math.max(1, ORES[worst].w - stats.weightCut);
+    if (!run.cargo[worst]) delete run.cargo[worst];
+  }
 }
-function pressure(){
-  const d = Math.min(run.depth, stats.pressCap);
-  return 1 + Math.floor(d / 25) * stats.pressCoef;
+/* 산소 소모율 — 현재 깊이만의 함수 */
+function drainRate(depth){
+  return drainRateAt(depth === undefined ? run.depth : depth);
+}
+/* 지금 깊이에서 지상까지 부스터로 오르는 데 필요한 산소 (상승 + 재충전 대기 포함) */
+function returnCost(){
+  /* 한 사이클: 연료를 다 태워 오르고 → 굴뚝에서 재점화선까지 채우며 조금 내려온다.
+     그 순 상승분을 1타일당 비용으로 환산한다. */
+  const riseSpd  = RISE * stats.thrust;
+  const burnT    = stats.fuelMax / (FUEL_DRAIN * stats.fuelEff);        // 만탱크 분사 시간
+  const upPx     = burnT * riseSpd;
+  const refuelT  = stats.fuelMax * RELIGHT / (stats.refill * WALL_REFILL);
+  const downPx   = refuelT * WALL_SLIDE;
+  const netPx    = Math.max(TILE, upPx - downPx);
+  const per      = (burnT + refuelT) * TILE / netPx;                     // 1타일당 소요 시간
+  let need = 0;
+  for (let d = run.depth; d > 0; d--) need += drainRate(d) * per;
+  return need;
 }
 const overweight = () => !stats.noOver && run.weight > stats.cap;
 
@@ -684,15 +776,18 @@ function step(dt){
   const cxp = run.x + PW / 2, cyp = run.y + PH / 2;
   let tgt = null;
   if (keys.dig)        tgt = { tx: Math.floor(cxp / TILE), ty: Math.floor((run.y + PH + 3) / TILE), dir: 'd' };
-  else if (keys.left)  tgt = { tx: Math.floor((run.x - 4) / TILE), ty: Math.floor(cyp / TILE), dir: 'l' };
-  else if (keys.right) tgt = { tx: Math.floor((run.x + PW + 4) / TILE), ty: Math.floor(cyp / TILE), dir: 'r' };
+  else if (keys.left)  tgt = { tx: colL(run.x), ty: Math.floor(cyp / TILE), dir: 'l' };
+  else if (keys.right) tgt = { tx: colR(run.x), ty: Math.floor(cyp / TILE), dir: 'r' };
 
   if (tgt){
     const tl = tileAt(tgt.tx, tgt.ty);
     if (solid(tl.t) && tl.t !== T.WALL){
       if (!run.dig || run.dig.tx !== tgt.tx || run.dig.ty !== tgt.ty) run.dig = { tx: tgt.tx, ty: tgt.ty, prog: 0, dir: tgt.dir };
       const hardEff = Math.max(1, tl.hard - stats.penetrate);
-      run.dig.need = hardEff * DIG_SEC / stats.digSpeed;
+      let spd2 = stats.digSpeed;
+      if (tl.t === T.ORE) spd2 *= stats.oreDig * stats.veinDig;
+      if (tl.hard >= 5)   spd2 *= stats.hardDig;
+      run.dig.need = hardEff * DIG_SEC / spd2;
       run.dig.prog += dt;
       if (run.dig.prog >= run.dig.need){
         mineTile(tgt.tx, tgt.ty, false);
@@ -719,22 +814,27 @@ function step(dt){
   }
 
   /* --- 이동 --- */
-  const spd = MOVE * (overweight() ? 0.62 : 1);
+  const spd = MOVE * (overweight() ? 0.55 : 1);
   run.vx = (keys.right ? spd : 0) - (keys.left ? spd : 0);
   if (keys.dig) run.vx = 0;                       // 아래를 팔 때는 제자리 고정
 
   /* --- 부스터 --- */
   const lowO2 = run.o2 < stats.o2Max * 0.15;
   const liftOn = stats.lift && lowO2;
+  if (run.fuel <= 0.01) run.relight = true;
+  if (run.relight && run.fuel >= stats.fuelMax * RELIGHT) run.relight = false;
   run.boosting = false;
-  if (keys.up && run.fuel > 0){
+  if (keys.up && run.fuel > 0 && !run.relight){
     // 등속 상승: 목표 속도로 수렴시켜 공중 정지와 벽면 굴착이 가능하게 한다
-    const want = -RISE * stats.thrust * (liftOn ? 2 : 1);
+    const heavy = overweight() && !stats.noRisePenalty ? 0.7 : 1;
+    const want = -RISE * stats.thrust * heavy * (liftOn ? 2 : 1);
     run.vy = run.vy > want ? Math.max(want, run.vy - RISE_ACC * dt) : Math.min(want, run.vy + RISE_ACC * dt);
-    run.fuel -= FUEL_DRAIN * (liftOn ? 0.5 : 1) * dt;
+    run.fuel = Math.max(0, run.fuel - FUEL_DRAIN * stats.fuelEff * (liftOn ? 0.5 : 1) * dt);
     run.boosting = true;
   } else {
     run.vy = Math.min(MAX_FALL, run.vy + GRAV * dt);
+    run.gliding = keys.up && run.vy > GLIDE;          // 임펠러 공회전 — 활공
+    if (run.gliding) run.vy = GLIDE;
   }
 
   /* --- 굴뚝 버티기: 좌우 벽에 닿아 있으면 완속 하강 + 연료 재충전 --- */
@@ -760,8 +860,8 @@ function step(dt){
     if (run.vy > 0){
       run.y = Math.floor((run.y + PH) / TILE) * TILE - PH;
       run.grounded = true;
-      if (run.vy > FALL_SAFE){
-        const dmg = (run.vy - FALL_SAFE) / 6;
+      if (run.vy > FALL_SAFE && !stats.noFallDmg){
+        const dmg = (run.vy - FALL_SAFE) / 10;
         run.hp -= dmg;
         if (dmg > 4) toast('낙하 충격 · 내구 −' + Math.round(dmg));
       }
@@ -775,31 +875,29 @@ function step(dt){
     run.grounded = true;
 
   /* --- 연료 충전: 접지 중에만 --- */
-  let refill;
-  if (run.grounded)      refill = stats.refill;                     // 접지 — 최대 속도
-  else if (run.cling)    refill = stats.refill * WALL_REFILL;       // 굴뚝 버티기 — 80%
-  else                   refill = stats.airRefill;                  // 냉각 코일만
-  run.fuel = Math.min(stats.fuelMax, run.fuel + refill * dt);
+  let rate;
+  if (run.grounded)   rate = 1;                                       // 접지 — 100%
+  else if (run.cling) rate = WALL_REFILL;                             // 굴뚝 버티기 — 80%
+  else if (!run.boosting) rate = AIR_REFILL + stats.airRefill;        // 공중 — 30% (+냉각 코일)
+  else rate = 0;                                                      // 분사 중에는 충전 불가
+  run.fuel = Math.min(stats.fuelMax, run.fuel + stats.refill * rate * dt);
 
   /* --- 깊이 · 산소 --- */
   run.depth = Math.max(0, Math.floor((run.y + PH) / TILE));
   if (run.depth > run.maxDepth) run.maxDepth = run.depth;
   if (run.depth > 4) run.descended = true;
 
-  run.gasHit = Math.max(0, run.gasHit - dt);
-  let drain = stats.drainBase * pressure() * band.env;
-  if (run.gasHit > 0) drain *= 2;
-  if (run.boosting) drain *= Math.max(1, BOOST_O2_MUL * stats.boostO2);
-  if (overweight()) drain *= 1.3;
-  run.o2 -= drain * dt;
+  run.o2 -= drainRate() * dt;      // 오직 깊이. 굴착·부스터·무게는 산소를 먹지 않는다
 
   if (touchesLava(run.x, run.y)) run.hp -= 70 * dt;
 
   /* --- 천장에 막힌 채 부스터를 태우고 있으면 알려준다 (위로는 팔 수 없다) --- */
-  if (run.boosting && run.vy >= -1){ run.blocked = (run.blocked || 0) + dt; } else run.blocked = 0;
+  const headSolid = solid(tileAt(Math.floor(cxp / TILE), Math.floor((run.y - 2) / TILE)).t);
+  if (keys.up && headSolid) run.blocked += dt; else run.blocked = 0;
+  run.escape = run.blocked > 0.5 ? findEscape() : 0;
   if (run.blocked > 0.9 && run.hintCeil !== run.maxDepth){
     run.hintCeil = run.maxDepth;
-    toast('머리 위가 막혔다 — 위로는 팔 수 없다. A/D로 옆을 파 샤프트로 돌아가라');
+    toast('머리 위가 막혔다 — 위로는 팔 수 없다. 화살표 방향으로 옆을 파라');
   }
 
   /* --- 힌트 --- */
@@ -807,23 +905,36 @@ function step(dt){
   if (run.hint === 1 && run.o2 < stats.o2Max * 0.45){ run.hint = 2; toast('산소 45% — W로 상승해 지상으로 돌아가라'); }
 
   /* --- 종료 판정 --- */
-  if (run.descended && run.y + PH < -18) return end('returned');
+  if (run.descended && run.y + PH < 6) return end('returned');
   if (run.o2 <= 0) return end('kung');
   if (run.hp <= 0) return end('crushed');
 
   if ((keys.anchor || pending.anchor) && stats.anchor && !run.anchorUsed){
     run.anchorUsed = true; keys.anchor = false; pending.anchor = false; return end('anchor');
   }
-  if (keys.rescue) run.rHold += dt; else run.rHold = 0;
-  if (run.rHold > 1.2) return end('rescued');
+}
+
+/* 막혔을 때 가장 가까운 "위가 열린 칸"의 방향과 거리 (음수 = 왼쪽) */
+function findEscape(){
+  const head = Math.floor((run.y + 4) / TILE);
+  const c0 = Math.floor((run.x + PW / 2) / TILE);
+  for (let dx = 1; dx <= 10; dx++){
+    for (const dir of [-1, 1]){
+      const c = c0 + dir * dx;
+      if (c < 0 || c >= WORLD_W) continue;
+      if (!solid(tileAt(c, head).t) && !solid(tileAt(c, head - 1).t) && !solid(tileAt(c, head - 2).t))
+        return dir * dx;
+    }
+  }
+  return 0;
 }
 
 /* ---------- 9. 정산 ---------- */
 function end(reason){
   mode = 'summary';
-  const keep = { returned: 1, anchor: 1, rescued: 0.7, kung: 1 - stats.loss, crushed: 1 - stats.loss }[reason];
+  const keep = { returned: 1, anchor: 1, kung: 1 - stats.loss, crushed: 1 - stats.loss, quit: 1 - stats.loss }[reason];
   let gross = 0;
-  for (const k in run.cargo) gross += ORES[k].v * run.cargo[k];
+  for (const k in run.cargo) gross += ORES[k].v * run.cargo[k] * (ORES[k].v >= 160 ? stats.richBonus : 1);
   gross = Math.round(gross * stats.sellMul);
   const net = Math.round(gross * keep);
 
@@ -838,6 +949,14 @@ function end(reason){
   save.runs++;
   store();
   showSummary(reason, { gross, net, keep, ms });
+}
+
+/* 아래쪽 가장 가까운 에어포켓 깊이 (산소 탐지 스킬) */
+function nearestAir(){
+  for (let ty = run.depth; ty < run.depth + 64; ty++)
+    for (let tx = 0; tx < WORLD_W; tx++)
+      if (tileAt(tx, ty).t === T.AIR) return ty;
+  return null;
 }
 
 /* ---------- 10. 렌더 ---------- */
@@ -889,19 +1008,28 @@ function draw(){
 
       if (tl.t === T.ORE){
         const o = ORES[ORE_KEYS[tl.ore]];
+        const pad = Math.round(TILE * 0.14), big = Math.round(TILE * 0.30);
         ctx.fillStyle = o.c2;
-        ctx.fillRect(sx + 3, sy + 3, TILE - 6, TILE - 6);
+        ctx.fillRect(sx + pad, sy + pad, TILE - pad * 2, TILE - pad * 2);
         ctx.fillStyle = o.c;
-        const ox = 4 + Math.floor(hash2(tx, ty, 11) * 5);
-        const oy = 4 + Math.floor(hash2(tx, ty, 13) * 5);
-        ctx.fillRect(sx + ox, sy + oy, 6, 6);
-        ctx.fillRect(sx + TILE - ox - 5, sy + TILE - oy - 5, 4, 4);
+        const ox = pad + Math.floor(hash2(tx, ty, 11) * (TILE - pad * 2 - big));
+        const oy = pad + Math.floor(hash2(tx, ty, 13) * (TILE - pad * 2 - big));
+        ctx.fillRect(sx + ox, sy + oy, big, big);
+        ctx.fillRect(sx + TILE - ox - big + 2, sy + TILE - oy - big + 2, Math.round(big * 0.6), Math.round(big * 0.6));
+        if (o.v >= RICH){                                  // 고가치 광석은 광택을 준다
+          ctx.fillStyle = 'rgba(255,255,255,' + (0.18 + 0.22 * glow) + ')';
+          ctx.fillRect(sx + ox, sy + oy, big, Math.max(2, Math.round(big * 0.28)));
+        }
       } else if (tl.t === T.AIR){
-        ctx.fillStyle = 'rgba(65,210,222,' + (0.55 + 0.3 * glow) + ')';
-        ctx.beginPath(); ctx.arc(sx + TILE / 2, sy + TILE / 2, 5.5, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(65,210,222,' + (0.5 + 0.3 * glow) + ')';
+        ctx.beginPath(); ctx.arc(sx + TILE / 2, sy + TILE / 2, TILE * 0.28, 0, 7); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,.7)';
+        ctx.beginPath(); ctx.arc(sx + TILE * 0.4, sy + TILE * 0.38, TILE * 0.08, 0, 7); ctx.fill();
       } else if (tl.t === T.GAS){
-        ctx.fillStyle = 'rgba(150,214,110,.75)';
-        ctx.fillRect(sx + 4, sy + 5, 4, 4); ctx.fillRect(sx + 11, sy + 9, 5, 5);
+        ctx.fillStyle = 'rgba(150,214,110,.8)';
+        const g1 = Math.round(TILE * 0.2);
+        ctx.fillRect(sx + g1, sy + g1 + 2, g1, g1);
+        ctx.fillRect(sx + TILE - g1 * 2 - 2, sy + TILE - g1 * 2, Math.round(g1 * 1.3), Math.round(g1 * 1.3));
       }
     }
   }
@@ -917,58 +1045,95 @@ function draw(){
   }
 
   if (run) drawPlayer();
+  if (run) drawScan(ty0, ty1);
+  if (run && run.escape){                                  // 탈출 방향 지시
+    const dir = Math.sign(run.escape), dist = Math.abs(run.escape);
+    const py = Math.round(run.y - camY + PH / 2);
+    const px = Math.round(run.x + PW / 2 + dir * TILE * 1.1);
+    ctx.fillStyle = css('--gold');
+    ctx.globalAlpha = 0.55 + 0.45 * Math.abs(Math.sin(time * 5));
+    for (let k = 0; k < 3; k++){
+      const bx = px + dir * k * 11;
+      ctx.beginPath();
+      ctx.moveTo(bx, py - 9); ctx.lineTo(bx + dir * 8, py); ctx.lineTo(bx, py + 9);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.font = '600 12px "IBM Plex Mono", monospace';
+    ctx.fillStyle = css('--ink-0');
+    ctx.textAlign = dir > 0 ? 'left' : 'right';
+    ctx.fillText(dist + '칸 파면 열린다', px + dir * 40, py - 16);
+    ctx.textAlign = 'left';
+  }
 
   // 암흑 (심연 이하)
-  const fog = bandAt(run ? run.depth : 0).fog;
+  const baseFog = bandAt(run ? run.depth : 0).fog;
+  const fog = (stats.xray || baseFog <= 0) ? 0 : baseFog + stats.fogBonus;
   if (fog > 0 && run){
     const px = run.x + PW / 2, py = run.y + PH / 2 - camY;
     const R = fog * TILE;
     const g = ctx.createRadialGradient(px, py, R * 0.35, px, py, R);
     g.addColorStop(0, 'rgba(4,6,8,0)'); g.addColorStop(1, 'rgba(4,6,8,.93)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
-    if (stats.senses){                       // 광부의 직감 — 암흑 투시
-      for (let ty = ty0; ty <= ty1; ty++)
-        for (let tx = 0; tx < WORLD_W; tx++){
-          const tl = tileAt(tx, ty);
-          if (tl.t !== T.ORE && tl.t !== T.AIR) continue;
-          const c = tl.t === T.AIR ? css('--o2') : ORES[ORE_KEYS[tl.ore]].c;
-          ctx.strokeStyle = c; ctx.globalAlpha = .55; ctx.lineWidth = 1;
-          ctx.strokeRect(tx * TILE + 2.5, Math.round(ty * TILE - camY) + 2.5, TILE - 5, TILE - 5);
-          ctx.globalAlpha = 1;
-        }
+
+  }
+}
+
+/* 탐사 갈래 오버레이 — 해금한 것만 표시된다 */
+function drawScan(ty0, ty1){
+  if (!(stats.showOre || stats.showHazard || stats.showAir)) return;
+  ctx.lineWidth = 2;
+  for (let ty = ty0; ty <= ty1; ty++){
+    const sy = Math.round(ty * TILE - camY);
+    for (let tx = 0; tx < WORLD_W; tx++){
+      const tl = tileAt(tx, ty);
+      let c = null, dash = false;
+      if (tl.t === T.ORE && stats.showOre){
+        const o = ORES[ORE_KEYS[tl.ore]];
+        if (o.v >= RICH){ if (stats.showRich) c = o.c; }
+        else c = 'rgba(232,236,234,.34)';
+      } else if (tl.t === T.AIR && stats.showAir) c = css('--o2');
+      else if ((tl.t === T.GAS || tl.t === T.LAVA) && stats.showHazard){ c = css('--hazard'); dash = true; }
+      if (!c) continue;
+      ctx.strokeStyle = c;
+      if (dash) ctx.setLineDash([4, 4]);
+      ctx.strokeRect(tx * TILE + 3, sy + 3, TILE - 6, TILE - 6);
+      if (dash) ctx.setLineDash([]);
     }
   }
 }
 
 function drawPlayer(){
-  const x = Math.round(run.x), y = Math.round(run.y - camY);
-  if (run.boosting){
-    const len = 8 + 7 * Math.random();
-    ctx.fillStyle = 'rgba(201,139,224,.9)';
-    ctx.fillRect(x + 3, y + PH, PW - 6, len);
-    ctx.fillStyle = 'rgba(255,255,255,.75)';
-    ctx.fillRect(x + 5, y + PH, PW - 10, len * 0.5);
+  const x = Math.round(run.x), y = Math.round(run.y - camY), w = PW, h = PH;
+  if (run.boosting){                                  // 발밑 부스터 화염
+    const len = Math.round(TILE * 0.4 + TILE * 0.35 * Math.random());
+    ctx.fillStyle = 'rgba(201,139,224,.85)';
+    ctx.fillRect(x + 4, y + h, w - 8, len);
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.fillRect(x + 7, y + h, w - 14, Math.round(len * 0.45));
   }
-  if (run.cling){
+  if (run.gliding){                                   // 활공 — 임펠러 공회전
+    ctx.fillStyle = 'rgba(201,139,224,.35)';
+    ctx.fillRect(x + 6, y + h, w - 12, Math.round(TILE * 0.22));
+  }
+  if (run.cling){                                     // 굴뚝 버티기 스파크
     ctx.fillStyle = 'rgba(232,236,234,.5)';
-    ctx.fillRect(x - 2, y + 5, 2, PH - 9);
-    ctx.fillRect(x + PW, y + 5, 2, PH - 9);
+    ctx.fillRect(x - 3, y + 6, 3, h - 12);
+    ctx.fillRect(x + w, y + 6, 3, h - 12);
   }
-  ctx.fillStyle = '#E2A83E';                        // 헬멧
-  ctx.fillRect(x + 1, y, PW - 2, 6);
-  ctx.fillStyle = '#F7F2E4';                        // 램프
-  ctx.fillRect(x + PW - 5, y + 1, 4, 3);
-  ctx.fillStyle = '#2C4152';                        // 몸통
-  ctx.fillRect(x + 1, y + 6, PW - 2, PH - 9);
-  ctx.fillStyle = '#41D2DE';                        // 산소통
-  ctx.fillRect(x + 2, y + 8, 3, PH - 13);
-  ctx.fillStyle = '#9AA3A8';                        // 다리 / 부스터
-  ctx.fillRect(x + 2, y + PH - 3, PW - 4, 3);
-  if (run.dig){                                     // 드릴
+  const hh = Math.round(h * 0.30);
+  ctx.fillStyle = '#E2A83E'; ctx.fillRect(x, y, w, hh);                    // 헬멧
+  ctx.fillStyle = '#0D1012'; ctx.fillRect(x + 3, y + hh - 4, w - 9, 4);    // 바이저
+  ctx.fillStyle = '#F7F2E4'; ctx.fillRect(x + w - 5, y + 2, 4, hh - 6);    // 램프
+  ctx.fillStyle = '#2C4152'; ctx.fillRect(x + 1, y + hh, w - 2, h - hh - 4); // 몸통
+  ctx.fillStyle = '#41D2DE'; ctx.fillRect(x + 3, y + hh + 3, 5, h - hh - 11); // 산소통
+  ctx.fillStyle = '#9AA3A8'; ctx.fillRect(x + 2, y + h - 4, w - 4, 4);     // 부츠/부스터
+  if (run.dig){                                                            // 드릴
     ctx.fillStyle = '#DDE3E6';
-    if (run.dig.dir === 'd') ctx.fillRect(x + PW / 2 - 2, y + PH - 1, 4, 5);
-    else if (run.dig.dir === 'l') ctx.fillRect(x - 4, y + PH / 2 - 2, 5, 4);
-    else ctx.fillRect(x + PW - 1, y + PH / 2 - 2, 5, 4);
+    const t = Math.round(TILE * 0.22);
+    if (run.dig.dir === 'd')      ctx.fillRect(x + w / 2 - 3, y + h - 2, 6, t);
+    else if (run.dig.dir === 'l') ctx.fillRect(x - t, y + h / 2 - 3, t, 6);
+    else                          ctx.fillRect(x + w - 2, y + h / 2 - 3, t, 6);
   }
 }
 
@@ -988,16 +1153,29 @@ function hud(){
   if (!run) return;
   gauge('o2', run.o2, stats.o2Max, 0.22);
   gauge('fuel', run.fuel, stats.fuelMax, 0.2);
+  const fl = gEls.fuel.root;
+  fl.querySelector('.lab span').textContent =
+    run.relight ? '부스터 · 재점화 대기 ' + Math.round(stats.fuelMax * RELIGHT) + ' 필요' + (run.gliding ? ' · 활공' : '')
+    : run.grounded ? '부스터 연료 · 접지 충전'
+    : run.cling ? '부스터 연료 · 굴뚝 충전' : '부스터 연료';
+  fl.querySelector('.fill').style.background = run.relight ? 'var(--hazard)' : 'var(--fuel)';
   gauge('hp', run.hp, 100, 0.25);
 
   const band = bandAt(run.depth);
   document.getElementById('hud-depth').innerHTML = run.depth + '<em>m</em>';
   const bt = document.getElementById('hud-band');
   bt.textContent = band.n; bt.style.setProperty('--c', 'var(' + BAND_VAR[band.id] + ')');
-  const p = pressure();
-  const drain = stats.drainBase * p * band.env;
   document.getElementById('hud-press').textContent =
-    'PRESSURE ' + p.toFixed(2) + '× · ' + drain.toFixed(1) + ' O₂/s';
+    drainRate().toFixed(2) + ' O₂/s  =  ' + stats.o2Idle.toFixed(2) + ' + ' +
+    run.depth + ' × ' + stats.o2PerM.toFixed(4);
+  const need = Math.ceil(returnCost());
+  const rEl = document.getElementById('hud-return');
+  rEl.textContent = '귀환 필요 ≈ ' + need + ' O₂';
+  rEl.style.color = need > run.o2 ? 'var(--hazard)' : need > run.o2 * 0.7 ? 'var(--gold)' : 'var(--ink-2)';
+  if (stats.showAir){
+    const a = nearestAir();
+    rEl.textContent += a === null ? '' : '  ·  에어포켓 ' + a + 'm';
+  }
 
   const rows = [];
   for (const k in run.cargo){
@@ -1044,7 +1222,7 @@ function treeHTML(){
     h += '<section class="branch" style="--b:var(' + b.v + ')">' +
          '<h4>' + b.en + '<em>' + b.n + '</em><u>' + pts + ' PT</u></h4>';
     b.tiers.forEach(tier => {
-      h += '<div class="tier' + (tier.length > 1 ? ' split' : '') + '">';
+      h += '<div class="tier' + (tier.length > 1 ? ' multi' : '') + '" style="--n:' + tier.length + '">';
       for (const nd of tier){
         const rank = save.ranks[nd.id] || 0, st = canBuy(nd);
         const cls = ['node'];
@@ -1096,12 +1274,18 @@ function showHub(){
     '<div class="eyebrow">지상 · 정산소 — ' + save.runs + '회 하강</div>' +
     '<h2>다음 하강을 준비한다</h2>' +
     '<p class="sub">골드는 전부 영구 스킬로 들어간다. 상위 티어는 <b>해당 갈래 누적 포인트</b>로 열린다 — ' +
-    'T2는 1PT, T3는 5PT, T4 정점은 9PT + 코어 조각 3개.</p>' +
+    'T2는 1PT, T3는 5PT, T4 정점은 7PT + 코어 조각 3개. 교차 노드는 두 갈래에 각 6PT.</p>' +
     '<dl class="stats">' +
       '<div><dt>보유 골드</dt><dd class="gold">' + save.gold.toLocaleString() + '</dd></div>' +
       '<div><dt>코어 조각</dt><dd>' + save.shards + '</dd></div>' +
       '<div><dt>최고 깊이</dt><dd>' + save.best + 'm</dd></div>' +
       '<div><dt>산소 탱크</dt><dd class="o2">' + stats.o2Max + '</dd></div>' +
+    '</dl>' +
+    '<dl class="stats">' +
+      '<div><dt>0m 소모율</dt><dd>' + stats.o2Idle.toFixed(2) + '<span style="font-size:12px;color:var(--ink-2)"> /s</span></dd></div>' +
+      '<div><dt>깊이 계수</dt><dd>' + stats.o2PerM.toFixed(4) + '<span style="font-size:12px;color:var(--ink-2)"> /m</span></dd></div>' +
+      '<div><dt>200m 소모율</dt><dd>' + drainRateAt(200).toFixed(2) + '<span style="font-size:12px;color:var(--ink-2)"> /s</span></dd></div>' +
+      '<div><dt>연료</dt><dd>' + stats.fuelMax + '</dd></div>' +
     '</dl>' +
     treeHTML() +
     '<div class="btnrow">' +
@@ -1112,21 +1296,25 @@ function showHub(){
   veil.hidden = false;
 }
 
-/* 보수적 하한: 에어포켓·산소결정 보급을 전혀 세지 않고 직하강 왕복만 계산한다 */
+/* 보수적 하한: 보급을 전혀 세지 않고 굴착 하강 + 부스터 귀환만 계산한다 */
 function estimateLimit(){
   let o2 = stats.o2Max, d = 0;
-  while (o2 > 0 && d < 2000){
+  const riseT = TILE / (RISE * stats.thrust);
+  while (o2 > 0 && d < 4000){
     const band = bandAt(d);
-    const pd = Math.min(d, stats.pressCap);
-    const p = 1 + Math.floor(pd / 25) * stats.pressCoef;
     const hard = Math.max(1, (band.hard[0] + band.hard[1]) / 2 - stats.penetrate);
-    const digO2 = hard * 0.6 * p * stats.digO2 * (1 - stats.refund);
-    const digT = hard * DIG_SEC / stats.digSpeed;
-    const riseT = TILE / (RISE * stats.thrust);                     // 귀환은 부스터 등속 상승
-    o2 -= digO2 + stats.drainBase * p * band.env * (digT + riseT * Math.max(1, BOOST_O2_MUL * stats.boostO2));
+    let spd = stats.digSpeed;
+    if (hard >= 5) spd *= stats.hardDig;
+    const digT = hard * DIG_SEC / spd;
+    const fuelT = FUEL_DRAIN * stats.fuelEff * riseT;
+    const refuelT = fuelT / Math.max(1, stats.refill * WALL_REFILL);
+    o2 -= drainRateAt(d) * (digT + riseT + refuelT);
     d++;
   }
   return d;
+}
+function drainRateAt(d){
+  return stats.o2Idle + d * stats.o2PerM;   // 오직 깊이의 1차 함수
 }
 
 /* ---------- 13. 화면: 정산 ---------- */
@@ -1134,13 +1322,14 @@ function showSummary(reason, r){
   const label = {
     returned: ['자력 귀환', '전리품 100% 보존. 가장 이득이 큰 결말이다.'],
     anchor:   ['귀환 앵커', '앵커로 즉시 이탈. 전리품 100% 보존.'],
-    rescued:  ['긴급 귀환 로프', '남은 산소를 전부 소진했다. 전리품 30% 손실.'],
+    quit:     ['하강 포기', '구조를 요청했다. 전리품 ' + Math.round(stats.loss * 100) + '% 손실.'],
     kung:     ['쿵 — 산소 고갈', '기절 후 구조. 전리품 ' + Math.round(stats.loss * 100) + '% 손실.'],
     crushed:  ['내구 파괴', '장비 손상으로 강제 귀환. 전리품 ' + Math.round(stats.loss * 100) + '% 손실.']
   }[reason];
 
   const rows = [];
-  for (const k in run.cargo) rows.push([ORES[k].n + ' ×' + run.cargo[k], (ORES[k].v * run.cargo[k]).toLocaleString() + ' G']);
+  for (const k in run.cargo) rows.push([ORES[k].n + ' ×' + run.cargo[k],
+    Math.round(ORES[k].v * run.cargo[k] * (ORES[k].v >= 160 ? stats.richBonus : 1)).toLocaleString() + ' G']);
   if (!rows.length) rows.push(['채굴 없음', '0 G']);
 
   panel.innerHTML =
@@ -1168,12 +1357,13 @@ function showSummary(reason, r){
 const KEYMAP = {
   ArrowLeft:'left', KeyA:'left', ArrowRight:'right', KeyD:'right',
   ArrowDown:'dig', KeyS:'dig', ArrowUp:'up', KeyW:'up', Space:'up',
-  KeyR:'rescue', KeyF:'core', KeyQ:'anchor'
+  KeyF:'core', KeyQ:'anchor', Escape:'pause'
 };
 addEventListener('keydown', e => {
   const k = KEYMAP[e.code];
   if (!k) return;
   e.preventDefault();
+  if (k === 'pause'){ if (!e.repeat) togglePause(); return; }
   if (!e.repeat && (k === 'core' || k === 'anchor')) pending[k] = true;
   keys[k] = true;
 });
@@ -1185,10 +1375,47 @@ addEventListener('keyup', e => {
 });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; });
 
+function togglePause(){
+  if (mode === 'run'){
+    mode = 'paused';
+    for (const key in keys) keys[key] = false;
+    showPause();
+  } else if (mode === 'paused'){
+    mode = 'run';
+    veil.hidden = true;
+  }
+}
+function showPause(){
+  const need = returnCost();
+  panel.innerHTML =
+    '<div class="eyebrow">일시 정지 — ' + run.depth + 'm</div>' +
+    '<h2>계속 내려갈까, 돌아갈까</h2>' +
+    '<p class="sub">산소는 오직 깊이로만 줄어든다. 지금 깊이의 소모율은 <b>' +
+      drainRate().toFixed(2) + ' O₂/s</b>이고, 여기서 지상까지 부스터로 오르는 데 약 <b>' +
+      Math.ceil(need) + ' O₂</b>가 든다.</p>' +
+    '<dl class="stats">' +
+      '<div><dt>남은 산소</dt><dd class="o2">' + Math.round(run.o2) + '</dd></div>' +
+      '<div><dt>귀환 필요</dt><dd' + (need > run.o2 ? ' style="color:var(--hazard)"' : '') + '>' + Math.ceil(need) + '</dd></div>' +
+      '<div><dt>적재</dt><dd>' + run.weight + ' / ' + stats.cap + '</dd></div>' +
+      '<div><dt>현재 전리품</dt><dd class="gold">' + cargoValue().toLocaleString() + '</dd></div>' +
+    '</dl>' +
+    '<div class="btnrow"><button class="btn" id="resume">계속하기</button>' +
+    '<button class="btn ghost" id="quit">하강 포기 (전리품 ' + Math.round(stats.loss * 100) + '% 손실)</button>' +
+    '<span class="hint">Esc 로도 재개된다</span></div>';
+  veil.hidden = false;
+}
+function cargoValue(){
+  let g = 0;
+  for (const k in run.cargo) g += ORES[k].v * run.cargo[k] * (ORES[k].v >= RICH ? stats.richBonus : 1);
+  return Math.round(g * stats.sellMul);
+}
+
 panel.addEventListener('click', e => {
   const btn = e.target.closest('button');
   if (!btn) return;
   if (btn.id === 'go' || btn.id === 'again') return newRun();
+  if (btn.id === 'resume') return togglePause();
+  if (btn.id === 'quit'){ mode = 'run'; return end('quit'); }
   if (btn.id === 'toHub') return showHub();
   if (btn.id === 'wipe'){
     save = blankSave(); store(); showHub(); return;
@@ -1206,6 +1433,7 @@ function frame(now){
 
   if (toastT > 0){ toastT -= dt; if (toastT <= 0) toastEl.classList.remove('on'); }
   if (mode === 'run'){ step(dt); hud(); }
+  else if (mode === 'paused'){ hud(); }
   draw();
   requestAnimationFrame(frame);
 }
@@ -1214,12 +1442,13 @@ function frame(now){
 window.DD = {
   get run(){ return run; }, get stats(){ return stats; }, get save(){ return save; },
   get keys(){ return keys; }, BANDS, ORES, TREE, CROSS, computeStats, bandAt, tileAt, T,
-  pressure: () => pressure(), estimateLimit: () => estimateLimit()
+  drainRate: (d) => drainRateAt(d === undefined ? run.depth : d),
+  returnCost: () => returnCost(), estimateLimit: () => estimateLimit()
 };
 
 load();
 stats = computeStats(save.ranks);
-run = { x: 24 * TILE, y: -PH, depth: 0, maxDepth: 0, cargo: {}, shards: 0, weight: 0,
+run = { x: SPAWN_TX * TILE, y: -PH, depth: 0, maxDepth: 0, cargo: {}, shards: 0, weight: 0,
         o2: stats.o2Max, fuel: stats.fuelMax, hp: 100, dig: null, boosting: false, t: 0, gasHit: 0 };
 showHub();
 requestAnimationFrame(frame);
